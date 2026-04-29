@@ -18,7 +18,11 @@ const download = document.querySelector('.download');
 const swtichBtDoc = document.querySelector('.switch');
 // 统计图
 const tooltip = document.querySelector('.tooltip');
-const offscreenCanvas = new OffscreenCanvas(300, 260);
+const offscreenCanvas = typeof OffscreenCanvas !== 'undefined'
+    ? new OffscreenCanvas(300, 260)
+    : document.createElement('canvas');
+offscreenCanvas.width = 300;
+offscreenCanvas.height = 260;
 const offCtx = offscreenCanvas.getContext('2d');
 const canvas = document.getElementById('lineChart');
 const ctx = canvas.getContext('2d');
@@ -46,6 +50,7 @@ let timeStamp;
 let intervalId;
 let intervalId2;
 let dataXY = [];
+let hasSavedOnExit = false;
 //导入导出
 let key = '';
 const eiport = document.querySelector('#eiport');
@@ -212,8 +217,6 @@ function selectLogToStatistics(offset) {
 
     let range;
     if (offset === 1) {
-        debugger
-
         current = now.getDate() + 1;
         offsetTem = 30;
         let num = current - offsetTem;
@@ -240,7 +243,6 @@ function selectLogToStatistics(offset) {
         current = now.getMonth() + 1;
         let num = current - offsetTem;
         lastMax = new Date(now.getFullYear(), 0, 0).getMonth() + 1;
-        debugger
         for (let i = 0; i < offsetTem; i++) {
             if (num < 0) {
                 let month = lastMax + num;
@@ -519,7 +521,7 @@ reset.addEventListener('click', (e) => {
     //重置当前数据
     currentPanel.h = 0;
     currentPanel.todayAddUp = 0;
-    currentPanel.todayNeedTime = currentPanel.todayTime;
+    currentPanel.todayNeedTime = Number(currentPanel.todayTime) * 1000 * 60 * 60;
     currentPanel.h = 0;
     currentPanel.m = 0;
     currentPanel.s = 0;
@@ -639,31 +641,50 @@ function saveState() {
 eiport.addEventListener('click', async (e) => {
     e.stopPropagation()
     if (e.target.className === 'import') {
-        const pickerOpts = {
-            types: [
-                {
-                    accept: {
-                        "text/*": [".json"],
-                    },
-                },
-            ],
-            excludeAcceptAllOption: true,
-            multiple: false,
-        };
-        // 打开文件选择器
-        const [fileHandle] = await window.showOpenFilePicker(pickerOpts);
-        // 获取文件内容
-        const fileData = await fileHandle.getFile();
-        const fileReader = new FileReader();
-        fileReader.addEventListener('load',()=>{
-            const parse = JSON.parse(fileReader.result);
-            if (fileData.name.includes('日志')){
-                addAllLog(parse)
-            }else {
-                addAllSkill(parse)
+        try {
+            if (typeof window.showOpenFilePicker === 'function') {
+                const pickerOpts = {
+                    types: [
+                        {
+                            accept: {
+                                "text/*": [".json"],
+                            },
+                        },
+                    ],
+                    excludeAcceptAllOption: true,
+                    multiple: false,
+                };
+                // 打开文件选择器
+                const [fileHandle] = await window.showOpenFilePicker(pickerOpts);
+                // 获取文件内容
+                const fileData = await fileHandle.getFile();
+                const fileReader = new FileReader();
+                fileReader.addEventListener('load', () => {
+                    try {
+                        const parse = JSON.parse(fileReader.result);
+                        if (!Array.isArray(parse)) {
+                            throw new Error('Invalid import payload');
+                        }
+                        if (fileData.name.includes('日志')) {
+                            addAllLog(parse)
+                        } else {
+                            addAllSkill(parse)
+                        }
+                    } catch (error) {
+                        alert('导入失败，请检查 JSON 文件内容是否正确。');
+                        console.error('导入解析失败', error);
+                    }
+                })
+                fileReader.readAsText(fileData)
+            } else {
+                alert('当前浏览器不支持文件系统选择器，请使用 Chromium 内核浏览器导入。');
             }
-        })
-        fileReader.readAsText(fileData)
+        } catch (err) {
+            if (err?.name !== 'AbortError') {
+                alert('导入失败，请检查 JSON 文件内容是否正确。');
+                console.error('导入失败', err);
+            }
+        }
 
     }
     if (e.target.className === 'export') {
@@ -687,10 +708,10 @@ eiport.addEventListener('click', async (e) => {
 //监听打开文件导入导出面板
 window.addEventListener('keydown', (e) => {
     key += e.key
-    if (key === 'Controle') {
+    if (e.ctrlKey && e.key.toLowerCase() === 'e') {
         eiport.classList.toggle('display-none', false)
     }
-    if (key === 'Escape') {
+    if (e.key === 'Escape') {
         eiport.classList.toggle('display-none', true)
     }
     setTimeout(() => {
@@ -708,7 +729,7 @@ window.addEventListener('click', (e) => {
         eiport.classList.toggle('display-none', true)
     }
     setTimeout(() => {
-        touchCount = '';
+        touchCount = 0;
     }, 800)
 
 })
@@ -816,18 +837,23 @@ swtichBtDoc.addEventListener('click', (e) => {
 })
 // 监听页面关闭
 window.addEventListener('unload', () => {
-    logItem.endDateTime = Date.now();
-    logItem.duration = logItem.endDateTime - logItem.startDateTime;
-    updateLog(logItem);
-    if (currentPanel) updateDataToStore(currentPanel);
+    persistBeforeExit();
 })
 // 监听页面刷新
 window.addEventListener('beforeunload', () => {
+    persistBeforeExit();
+})
+
+function persistBeforeExit() {
+    if (hasSavedOnExit) {
+        return;
+    }
+    hasSavedOnExit = true;
     logItem.endDateTime = Date.now();
     logItem.duration = logItem.endDateTime - logItem.startDateTime;
     updateLog(logItem);
     if (currentPanel) updateDataToStore(currentPanel);
-})
+}
 // 后台运行逻辑
 document.addEventListener('visibilitychange', () => {
     if (document.hidden && onOffDoc.value === 'off') {
@@ -1032,8 +1058,8 @@ canvas.addEventListener('mousemove', showTooltip);
 
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/serviceWorkerCache.js').then((result) => console.log('注册成功', result)
-        );
+        const swUrl = new URL('serviceWorkerCache.js', window.location.href).pathname;
+        navigator.serviceWorker.register(swUrl).then((result) => console.log('注册成功', result));
     }
 }
 

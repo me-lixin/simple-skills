@@ -12,7 +12,6 @@
     box-sizing: border-box;
     margin: 0;
     font-family: monospace, sans-serif;
-    border-radius: 20px;
 }
 /* 使用CSS变量 */
 :root{
@@ -26,23 +25,30 @@
     --start-bg:#dbd2ca;
     --stop-bg:#dbd2ca;
     --return-bg:#dbd2ca;
+    --text-main: #3b3535;
+    --text-sub: #5a5353;
+    --accent: #a22a2a;
+    --shadow-soft: 0 8px 22px rgba(72, 64, 64, 0.18);
+    --radius-md: 1.2rem;
+    --radius-lg: 1.6rem;
 }
 html {
     font-size: 10px;
-    color: #484040;
+    color: var(--text-main);
     letter-spacing: 2.5px;
+    scroll-behavior: smooth;
 }
 
 body {
-    border-radius: 1rem;
     min-width: 32rem;
-    padding: 0.5rem;
-    margin: 0.5rem;
+    padding: 0.8rem;
+    margin: 0.8rem;
+    border-radius: 1.2rem;
 }
 
 body button:hover {
     cursor: pointer;
-    border: solid 0.1rem white;
+    border: solid 0.1rem rgba(255, 255, 255, 0.95);
 }
 
 body li:active,
@@ -54,6 +60,19 @@ body button,
 body li {
     border: none;
     -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+li {
+    transition: all 0.2s ease;
+}
+
+button:focus-visible,
+input:focus-visible,
+li:focus-visible {
+    outline: 0.2rem solid rgba(162, 42, 42, 0.42);
+    outline-offset: 0.2rem;
 }
 
 body,
@@ -72,10 +91,11 @@ ul,
 button,
 label {
     font-size: 1.7rem;
+    color: var(--text-sub);
 }
 
 b {
-    color: #a22a2a;
+    color: var(--accent);
     font-size: 1.7rem;
 
 }
@@ -85,25 +105,27 @@ header,
 main,
 footer {
     margin-bottom: 10px;
-    box-shadow: 3px 3px 28px #606362, 5px 3px 24px #b9b2b2;
+    box-shadow: var(--shadow-soft);
 }
 
 /* 头部样式 */
 header {
-    margin-top:-1rem;
+    margin-top: -1rem;
     min-height: 7rem;
-    padding: 0 2rem 0 1rem;
+    padding: 0.8rem 1.6rem;
     display: flex;
     flex-flow: row wrap;
     position: sticky;
     top: 0rem;
     z-index: 99;
     border-radius: 0px 0px 30px 30px;
+    backdrop-filter: blur(2px);
 }
 
 header img {
     width: 6rem;
     height: 6rem;
+    border-radius: 50%;
 }
 
 header .right {
@@ -111,6 +133,7 @@ header .right {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1.2rem;
 }
 
 header .right-menu {
@@ -126,13 +149,16 @@ header .right-menu {
     height: 3.2rem;
     border-style: hidden;
     background: center / 68% 68% no-repeat url("/images/menu.svg"), #565858;
+    border-radius: 1rem;
 }
 
 header .logo-title {
     flex: 1 220px;
-    align-self: baseline;
-    padding: 1rem;
+    align-self: center;
+    padding: 0.6rem;
     display: flex;
+    align-items: center;
+    gap: 0.8rem;
 
 }
 
@@ -142,18 +168,19 @@ header .ambition {
     display: inline-block;
     font-family: alimama, monospace;
 
+    color: var(--text-main);
 }
 
 
 header h1 {
     font-size: 3rem;
-    margin-top: 2.4rem;
+    margin-top: 0;
     font-family: alimama, monospace;
 }
 
 /* 内容体样式 */
 main {
-    height: 65rem;
+    min-height: calc(100vh - 19rem);
     display: flex;
     gap: 1rem;
     box-shadow: none;
@@ -165,20 +192,27 @@ section {
     flex-flow: row wrap;
     overflow: auto;
     justify-content: start;
-    gap: 1rem;
+    gap: 1.2rem;
     line-height: 3.2rem;
-    box-shadow: 3px 3px 28px #606362, 5px 3px 24px #b9b2b2;
-    padding: 1rem;
+    box-shadow: var(--shadow-soft);
+    padding: 1.2rem;
+    align-content: flex-start;
+    border-radius: var(--radius-lg);
 }
 
 section div {
-    box-shadow: 3px 3px 28px #606362, 5px 3px 24px #b9b2b2;
-
-    width: 31rem;
-    height: 37rem;
+    box-shadow: var(--shadow-soft);
+    border-radius: 1.4rem;
+    width: min(100%, 31rem);
+    min-height: 37rem;
     padding: 0rem 1rem 0.5rem 1rem;
     overflow: auto;
     position: relative;
+}
+
+section div:hover {
+    transform: translateY(-0.2rem);
+    box-shadow: 0 10px 26px rgba(72, 64, 64, 0.24);
 }
 
 h2 {
@@ -186,7 +220,8 @@ h2 {
     margin-bottom: 0.6rem;
     font-size: 2rem;
     text-align: center;
-    border-bottom: solid 0.2rem #484040;
+    border-bottom: solid 0.2rem rgba(72, 64, 64, 0.65);
+    color: var(--text-main);
 }
 
 .start-skill {
@@ -196,6 +231,7 @@ h2 {
     height: 5rem;
     border-radius: 4rem;
     opacity: 0.7;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .delete-skill {
@@ -212,22 +248,25 @@ h2 {
     height: 3.2rem;
     border-style: hidden;
     background: center / 70% 70% no-repeat url("/images/add.svg"), green;
+    border-radius: 1rem;
 }
 
 aside {
-    box-shadow: 3px 3px 28px #606362, 5px 3px 24px #b9b2b2;
+    box-shadow: var(--shadow-soft);
     flex: 2;
-    min-width: 32rem;
+    min-width: 34rem;
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
     position: relative;
+    border-radius: 1.4rem;
 }
 
 .subnav ul li {
-    padding: 0.5rem;
+    padding: 0.5rem 0.8rem;
     list-style-type: none;
     display: inline;
+    border-radius: 0.8rem;
 
 }
 
@@ -237,6 +276,7 @@ aside {
     position: sticky;
     top: 0rem;
     border-radius: 20px 20px 0px 0px;
+    border-bottom: 0.1rem solid rgba(72, 64, 64, 0.15);
 }
 
 .return {
@@ -253,14 +293,17 @@ aside {
 
 .content {
     flex: 30;
+    display: flex;
     flex-flow: column;
     overflow: auto;
-    height: 59rem;
+    height: 100%;
+    border-radius: var(--radius-md);
 }
 
 .subnav li:hover {
     cursor: pointer;
     border: solid 0.1rem #eee;
+    background: rgba(255, 255, 255, 0.75);
 }
 
 .subnav ul {
@@ -275,6 +318,7 @@ aside {
     position: absolute;
     right: 1.5rem;
     font-size: 1.4rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }
 
 .tooltip {
@@ -289,7 +333,8 @@ aside {
 .log-info {
     padding: 2rem;
     overflow: auto;
-    height: 59rem;
+    height: 100%;
+    line-height: 1.8;
 }
 
 #loading {
@@ -309,17 +354,24 @@ aside {
     top: 6rem;
     right: 2rem;
     font-size: 1.4rem;
+    border-radius: 1rem;
 }
 
 .statistics {
     padding: 1rem;
     position: relative;
     text-align: center;
+    overflow: auto;
+    height: 100%;
+    border-radius: var(--radius-md);
 
 }
 
 .instruction {
     padding: 0rem 2rem 2rem 2rem;
+    overflow: auto;
+    height: 100%;
+    border-radius: var(--radius-md);
 }
 
 /* 技能相页关操作 */
@@ -327,11 +379,14 @@ aside {
     flex: 30;
     padding: 1rem 3rem 3rem 3rem;
     overflow: auto;
+    height: 100%;
+    border-radius: var(--radius-md);
 }
 
 .skill-form {
     display: grid;
     border-radius: 1rem;
+    gap: 0.4rem;
 }
 
 .skill-form fieldset,
@@ -352,6 +407,10 @@ label {
 
 .skill-form input[type='text'] {
     height: 3rem;
+    border: 0.1rem solid rgba(72, 64, 64, 0.35);
+    padding: 0 0.8rem;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.8);
 }
 
 .duration {
@@ -364,6 +423,7 @@ label {
     margin-top: 2rem;
     font-size: 1.4rem;
     padding: 0rem 2rem 1rem 2rem;
+    line-height: 1.6;
 }
 
 .author-said li {
@@ -376,6 +436,10 @@ label {
 .submit {
     margin-top: 1rem;
     border-style: hidden;
+    min-height: 3.4rem;
+    border-radius: 1rem;
+    background: #4f5f58;
+    color: #fff;
 }
 
 
@@ -464,6 +528,7 @@ footer {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    border-radius: 1.2rem;
 }
 /*导出样式*/
 .export-import{
@@ -477,6 +542,8 @@ footer {
     left:50%;
     transform: translateY(-50%) translateX(-50%);
     opacity: 0.6;
+    border-radius: 1.4rem;
+    box-shadow: var(--shadow-soft);
 }
 /* 隐藏类 */
 .display-none {
@@ -485,8 +552,46 @@ footer {
 
 /* 浏览器视口宽度小于650px*/
 @media screen and (max-width:650px) {
+    body {
+        margin: 0;
+        padding: 0.6rem;
+        border-radius: 0;
+    }
+
+    header {
+        margin-top: 0;
+        border-radius: 0 0 1.6rem 1.6rem;
+        padding: 0.8rem 1rem;
+    }
+
+    header .right {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    header .ambition {
+        font-size: 1.8rem;
+    }
+
+    main {
+        min-height: calc(100vh - 15rem);
+    }
+
     section {
         justify-content: space-around;
+    }
+
+    section div {
+        width: 100%;
+    }
+
+    aside {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .subnav ul {
+        padding-left: 3.6rem;
     }
 
     .mask .time-show {
